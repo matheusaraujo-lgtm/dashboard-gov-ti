@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Governança de TI - Rede FUNEV</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ================================================================
+   PADRÃO VISUAL POWER BI - FUNEV
+   Fundo cinza claro, cards brancos, sidebar azul escuro,
+   barras azuis, tipografia Segoe UI
+   ================================================================ */
+:root {
+  --bg: #e8e8e8;
+  --bg-content: #dcdcdc;
+  --card-bg: #ffffff;
+  --card-border: #d0d0d0;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --sidebar-bg: #1b3a5c;
+  --sidebar-btn: #2a5480;
+  --sidebar-btn-hover: #3a6a9a;
+  --sidebar-active: #1b3a5c;
+  --title-color: #1b3a5c;
+  --text-dark: #333333;
+  --text-medium: #555555;
+  --text-light: #888888;
+  --text-white: #ffffff;
+  --bar-blue: #4472C4;
+  --bar-blue2: #5B9BD5;
+  --bar-orange: #ED7D31;
+  --bar-green: #70AD47;
+  --bar-yellow: #FFC000;
+  --bar-red: #C00000;
+  --bar-purple: #7030A0;
+  --bar-pink: #D55B9D;
+  --bar-teal: #00B0F0;
+  --alert-red: #C00000;
+  --alert-bg: #8B0000;
+  --radius: 6px;
+  --radius-sm: 4px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg);
+  color: var(--text-dark);
+  min-height: 100vh;
+}
+
+/* ========== LAYOUT ========== */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+  width: 140px;
+  min-width: 140px;
+  background: var(--sidebar-bg);
+  border-right: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 12px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.logo-box {
+  width: 120px;
+  height: auto;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 14px 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.logo-box span {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--sidebar-bg);
+  letter-spacing: 1px;
+}
+
+.sidebar-btn {
+  width: 120px;
+  padding: 10px 6px;
+  margin-bottom: 4px;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.sidebar-btn:hover {
+  background: rgba(255,255,255,0.25);
+  color: white;
+  border-color: rgba(255,255,255,0.4);
+}
+.sidebar-btn.active {
+  background: rgba(255,255,255,0.95);
+  color: var(--sidebar-bg);
+  border-color: #ffffff;
+  font-weight: 700;
+}
+
+.sidebar-divider {
+  width: 110px;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+  margin: 10px 0;
+}
+
+/* ========== MAIN ========== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ========== HEADER ========== */
+.header {
+  background: var(--sidebar-bg);
+  border-bottom: none;
+  padding: 14px 24px;
+  text-align: center;
+}
+.header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.header .subtitle {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+}
+
+/* ========== PAGE TABS ========== */
+.page-tabs {
+  display: flex;
+  background: var(--card-bg);
+  border-bottom: 2px solid var(--card-border);
+  padding: 0 16px;
+}
+.page-tab {
+  padding: 10px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  color: var(--text-medium);
+  transition: all 0.15s;
+  font-family: inherit;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.page-tab:hover {
+  color: var(--title-color);
+  background: #f0f0f0;
+}
+.page-tab.active {
+  color: var(--title-color);
+  border-bottom-color: var(--bar-blue);
+}
+
+/* ========== CONTENT ========== */
+.content {
+  flex: 1;
+  padding: 16px;
+  background: var(--bg-content);
+  overflow-y: auto;
+}
+
+.section { display: none; animation: fadeIn 0.2s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from{opacity:0}to{opacity:1} }
+
+/* ========== CARDS KPI ROW ========== */
+.kpi-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.kpi-card {
+  flex: 1;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 16px 12px;
+  text-align: center;
+  position: relative;
+}
+.kpi-card .kpi-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+  opacity: 0.5;
+}
+.kpi-card .kpi-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--title-color);
+  line-height: 1.1;
+}
+.kpi-card .kpi-label {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 4px;
+  font-weight: 400;
+}
+.kpi-card .kpi-sub {
+  font-size: 10px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+.kpi-card.alert-card {
+  background: var(--alert-bg);
+  border-color: #600;
+  color: white;
+}
+.kpi-card.alert-card .kpi-value { color: white; }
+.kpi-card.alert-card .kpi-label { color: rgba(255,255,255,0.8); }
+.kpi-card.alert-card .kpi-sub { color: rgba(255,255,255,0.6); }
+
+.kpi-card.success-card {
+  background: #1a5c2a;
+  border-color: #145020;
+  color: white;
+}
+.kpi-card.success-card .kpi-value { color: white; }
+.kpi-card.success-card .kpi-label { color: rgba(255,255,255,0.8); }
+.kpi-card.success-card .kpi-sub { color: rgba(255,255,255,0.6); }
+
+/* ========== CHARTS GRID ========== */
+.charts-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.chart-card {
+  flex: 1;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 14px 16px;
+  min-height: 280px;
+}
+.chart-card.w60 { flex: 1.5; }
+.chart-card.w40 { flex: 1; }
+.chart-card.full { flex: 1; }
+
+.chart-card h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 2px;
+}
+.chart-card .chart-sub {
+  font-size: 10.5px;
+  color: var(--text-light);
+  margin-bottom: 10px;
+}
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 230px;
+}
+.chart-wrapper.tall { height: 290px; }
+
+/* ========== BADGE / TAG ========== */
+.badge-nc {
+  display: inline-block;
+  background: var(--alert-bg);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 3px;
+  float: right;
+  margin-top: -2px;
+}
+
+/* ========== INSIGHT ========== */
+.insight {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-left: 4px solid var(--bar-blue);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-medium);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+.insight strong { color: var(--title-color); }
+.insight.warning { border-left-color: var(--alert-red); }
+
+/* ========== ECONOMY SECTION ========== */
+.economy-total {
+  background: linear-gradient(135deg, #1a5c2a, #0d3318);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  color: white;
+  margin-bottom: 14px;
+}
+.economy-total .eco-label { font-size: 12px; opacity: 0.8; margin-bottom: 6px; }
+.economy-total .eco-value { font-size: 42px; font-weight: 700; }
+.economy-total .eco-details { font-size: 12px; opacity: 0.7; margin-top: 10px; }
+
+.scenarios-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.scenario-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 14px;
+}
+.scenario-card h4 { font-size: 11.5px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+.scenario-card .sc-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bar-green);
+}
+.scenario-card .sc-desc {
+  font-size: 10.5px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+
+/* ========== STACKED BAR (custom for duplicados) ========== */
+.stacked-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+.stacked-label {
+  width: 180px;
+  text-align: right;
+  padding-right: 10px;
+  color: var(--text-medium);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.stacked-bars {
+  flex: 1;
+  display: flex;
+  height: 22px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.stacked-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 18px;
+}
+.stacked-total {
+  width: 36px;
+  text-align: right;
+  padding-left: 6px;
+  font-weight: 700;
+  color: var(--alert-red);
+  font-size: 12px;
+}
+.stacked-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 10px 0 6px 0;
+}
+
+/* ========== RANKING LIST (Fornecedores) ========== */
+.rank-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.rank-medal {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.rank-medal.gold { background: #DAA520; }
+.rank-medal.silver { background: #A0A0A0; }
+.rank-medal.bronze { background: #CD7F32; }
+.rank-medal.normal { background: var(--bar-blue); }
+.rank-name { font-size: 12px; font-weight: 600; width: 120px; flex-shrink:0; }
+.rank-bar-wrap { flex: 1; margin: 0 10px; }
+.rank-bar-bg {
+  height: 22px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: visible;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.rank-bar-fill {
+  height: 22px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: visible;
+}
+.rank-pct { font-size: 11px; color: var(--text-light); width: 45px; text-align:right; }
+
+/* ========== CUSTO UNIDADE HORIZONTAL BAR ========== */
+.hbar-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.hbar-label {
+  width: 100px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-align: right;
+  padding-right: 10px;
+  color: var(--text-dark);
+  flex-shrink: 0;
+}
+.hbar-wrap { flex: 1; margin-right: 8px; }
+.hbar-bg {
+  height: 22px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.hbar-fill {
+  height: 100%;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  color: white;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.hbar-pct {
+  font-size: 11px;
+  color: var(--text-light);
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1100px) {
+  .charts-row { flex-direction: column; }
+  .kpi-row { flex-wrap: wrap; }
+  .kpi-card { min-width: 140px; }
+  .scenarios-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .sidebar { width: 60px; min-width: 60px; }
+  .sidebar-btn { width: 50px; font-size: 8px; padding: 6px 2px; }
+  .logo-box { width: 45px; height: 45px; }
+  .logo-box span { font-size: 10px; }
+  .content { padding: 10px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ========== SIDEBAR ========== -->
+  <div class="sidebar">
+    <div class="logo-box"><img src="data:image/png;base64,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" alt="FUNEV" style="width:80px;height:auto;"></div>
+    <button class="sidebar-btn active" data-unit="ALL">Selecionar<br>tudo</button>
+    <button class="sidebar-btn" data-unit="(Em branco)">(Em branco)</button>
+    <button class="sidebar-btn" data-unit="FUNEV">FUNEV</button>
+    <button class="sidebar-btn" data-unit="HEANA">HEANA</button>
+    <button class="sidebar-btn" data-unit="HEELJ">HEELJ</button>
+    <button class="sidebar-btn" data-unit="HESLMB">HESLMB</button>
+    <button class="sidebar-btn" data-unit="HMAA">HMAA</button>
+    <button class="sidebar-btn" data-unit="PERSP">PERSP</button>
+    <button class="sidebar-btn" data-unit="PLC SLMB">PLC SLMB</button>
+    <button class="sidebar-btn" data-unit="UPA PED">UPA PED</button>
+    <button class="sidebar-btn" data-unit="USFs">USFs</button>
+  </div>
+
+  <!-- ========== MAIN ========== -->
+  <div class="main">
+    <div class="header">
+      <h1 id="pageTitle">Dashboard de Governança de TI - Gestão Financeira</h1>
+      <div class="subtitle">📅 Base: FEV/2026</div>
+    </div>
+
+    <!-- PAGE TABS -->
+    <div class="page-tabs">
+      <button class="page-tab active" data-page="visao-geral">Visão Geral</button>
+      <button class="page-tab" data-page="gestao-financeira">Gestão Financeira</button>
+      <button class="page-tab" data-page="gestao-ativos">Gestão de Ativos</button>
+      <button class="page-tab" data-page="gestao-pessoas">Gestão de Pessoas</button>
+      <button class="page-tab" data-page="gestao-demanda">Gestão da Demanda</button>
+      <button class="page-tab" data-page="economia">Economia & Projeções</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ============ VISÃO GERAL ============ -->
+      <div class="section active" id="visao-geral">
+        <div class="kpi-row" id="vg-kpis"></div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>Tickets por Tipo</h3>
+            <div class="chart-wrapper"><canvas id="vgTicketsTipo"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Tickets por Tipo de Atendimento</h3>
+            <div class="chart-wrapper"><canvas id="vgTicketsAtend"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Qtde de Ticket por período</h3>
+            <div class="chart-wrapper"><canvas id="vgTicketsPeriodo"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card w40">
+            <div class="kpi-row" style="margin-bottom:0">
+              <div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:28px" id="vgUnid24h">2</div><div class="kpi-label">Unidades com 24h</div></div>
+              <div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:28px" id="vgHorasRes">6,89</div><div class="kpi-label">Média Horas Resolução</div></div>
+            </div>
+            <div class="kpi-row" style="margin-top:12px;margin-bottom:0">
+              <div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:28px" id="vgTotalProfs">21</div><div class="kpi-label">Total Profissionais</div></div>
+              <div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:28px" id="vgTicketsProf">161,81</div><div class="kpi-label">Tickets por Profissional</div></div>
+            </div>
+          </div>
+          <div class="chart-card w60">
+            <h3>Profissionais por Cargo</h3>
+            <div class="chart-wrapper"><canvas id="vgProfsCargo"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ GESTÃO FINANCEIRA ============ -->
+      <div class="section" id="gestao-financeira">
+        <div class="kpi-row" id="gf-kpis"></div>
+        <div class="charts-row">
+          <div class="chart-card w60">
+            <h3>Contratos por Unidade</h3>
+            <div class="chart-wrapper tall"><canvas id="gfContratosUnid"></canvas></div>
+          </div>
+          <div class="chart-card w40">
+            <h3>Objetos com Contratos Duplicados <span class="badge-nc">⚠ NÃO-CONFORMIDADE</span></h3>
+            <div id="gfDuplicados" style="margin-top:10px;max-height:310px;overflow-y:auto"></div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>Top 10 Fornecedores - Custo Mensal</h3>
+            <div class="chart-sub">Principais parceiros por investimento mensal</div>
+            <div id="gfFornecedores"></div>
+          </div>
+          <div class="chart-card">
+            <h3>Custo Mensal por Unidade</h3>
+            <div class="chart-sub">Valores em R$ Mil - Total: R$ 742 Mil/Mês</div>
+            <div id="gfCustoUnidade"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ GESTÃO DE ATIVOS ============ -->
+      <div class="section" id="gestao-ativos">
+        <div class="kpi-row" id="ga-kpis"></div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>🔴 Softwares Irregulares por Unidade</h3>
+            <div class="chart-sub">Equipamentos com software crackeado ou sem licença</div>
+            <div class="chart-wrapper"><canvas id="gaIrregulares"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Modalidade de Aquisição por Unidade</h3>
+            <div class="chart-sub">Contrato × Patrimônio × Irregular</div>
+            <div class="chart-wrapper"><canvas id="gaModalidade"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>📅 Vigência de Contratos — Próximos 12 Meses</h3>
+            <div class="chart-sub">Contratos a vencer entre Mar/2026 e Fev/2027</div>
+            <div class="chart-wrapper"><canvas id="gaVigencia"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Top Fornecedores por Volume de Contratos</h3>
+            <div class="chart-sub">Quantidade de unidades atendidas</div>
+            <div class="chart-wrapper"><canvas id="gaFornecedoresVol"></canvas></div>
+          </div>
+        </div>
+        <div class="insight warning">
+          <strong>⚠️ ALERTA CRÍTICO:</strong> 442+ equipamentos com software irregular. USFs concentram 81% de toda irregularidade (358 equipamentos). <strong>Impacto potencial: R$ 2,8 milhões</strong> em multas + LGPD.
+        </div>
+      </div>
+
+      <!-- ============ GESTÃO DE PESSOAS ============ -->
+      <div class="section" id="gestao-pessoas">
+        <div class="kpi-row" id="gp-kpis"></div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>Profissionais por Unidade</h3>
+            <div class="chart-wrapper"><canvas id="gpProfissionais"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Custo Folha Mensal por Unidade</h3>
+            <div class="chart-wrapper"><canvas id="gpFolha"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>Custo por Ticket — Ranking de Eficiência</h3>
+            <div class="chart-sub">Menor = Melhor eficiência operacional</div>
+            <div class="chart-wrapper"><canvas id="gpCustoTicket"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Custo Folha × Tickets por Profissional</h3>
+            <div class="chart-sub">Tamanho = Quantidade de profissionais</div>
+            <div class="chart-wrapper"><canvas id="gpBolhas"></canvas></div>
+          </div>
+        </div>
+        <div class="insight">
+          <strong>📌 3 unidades com profissional único</strong> (UPA, PERSP, PLC) = Risco de dependência. HEANA concentra 26% da força de trabalho e 40% do custo de folha. UPA é <strong>13x mais eficiente</strong> que PLC em custo/ticket.
+        </div>
+      </div>
+
+      <!-- ============ GESTÃO DA DEMANDA ============ -->
+      <div class="section" id="gestao-demanda">
+        <div class="kpi-row" id="gd-kpis"></div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>Tickets/Mês por Unidade</h3>
+            <div class="chart-wrapper"><canvas id="gdTicketsUnid"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>⚠️ Índice de Sobrecarga (Tickets/Profissional)</h3>
+            <div class="chart-sub">Linha vermelha = média da rede (144)</div>
+            <div class="chart-wrapper"><canvas id="gdSobrecarga"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>Composição da Demanda por Categoria</h3>
+            <div class="chart-sub">Sistemas × Equipamentos × Links</div>
+            <div class="chart-wrapper"><canvas id="gdCategoria"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Distribuição de Tickets por Turno</h3>
+            <div class="chart-sub">Matutino × Vespertino × Noturno</div>
+            <div class="chart-wrapper"><canvas id="gdTurno"></canvas></div>
+          </div>
+        </div>
+        <div class="insight warning">
+          <strong>⚠️ Sobrecarga crítica:</strong> UPA-PED (346) e PERSP (343) operam com mais de 340 tickets/profissional. HEANA concentra <strong>44% de toda a demanda</strong> da rede.
+        </div>
+      </div>
+
+      <!-- ============ ECONOMIA ============ -->
+      <div class="section" id="economia">
+        <div class="kpi-row" id="ec-kpis"></div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3>✅ Economia Já Realizada — Workspace</h3>
+            <div class="chart-sub">Centralização de e-mail (antes vs economia obtida)</div>
+            <div class="chart-wrapper"><canvas id="ecWorkspace"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>📈 Projeção de Economia por Cenário (Anual)</h3>
+            <div class="chart-wrapper"><canvas id="ecCenarios"></canvas></div>
+          </div>
+        </div>
+        <div class="scenarios-grid">
+          <div class="scenario-card">
+            <h4>🏗️ Cenário 1: Centralização Hardware</h4>
+            <div class="sc-value">R$ 450.000</div>
+            <div class="sc-desc">MICRO & SOFT, DW SERVICE, etc.</div>
+          </div>
+          <div class="scenario-card">
+            <h4>💻 Cenário 2: Regularização Softwares</h4>
+            <div class="sc-value">R$ 472.000</div>
+            <div class="sc-desc">Investimento único — Prioridade USFs</div>
+          </div>
+          <div class="scenario-card">
+            <h4>👥 Cenário 3: Redimensionamento Equipes</h4>
+            <div class="sc-value">R$ 400.000</div>
+            <div class="sc-desc">Realocação HEANA → UPA/PERSP</div>
+          </div>
+          <div class="scenario-card">
+            <h4>☁️ Cenário 4: Centralização SaaS</h4>
+            <div class="sc-value">R$ 300.000</div>
+            <div class="sc-desc">Antivírus, links, sistemas</div>
+          </div>
+        </div>
+        <div class="economy-total">
+          <div class="eco-label">🏆 TOTAL ECONOMIA RECORRENTE</div>
+          <div class="eco-value">R$ 1.150.000/ano</div>
+          <div class="eco-details">Investimento: R$ 472.000 &nbsp;|&nbsp; Payback: 5 meses &nbsp;|&nbsp; ROI 5 anos: 1.200%</div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ============================================================
+// DATA — Extraído de GOVERNANÇA_TI_-_REDE_FUNEV.xlsx
+// ============================================================
+
+// Paleta Power BI padrão
+const PBI = {
+  blue: '#4472C4', blue2:'#5B9BD5', orange:'#ED7D31', green:'#70AD47',
+  yellow:'#FFC000', red:'#C00000', purple:'#7030A0', teal:'#00B0F0',
+  dkBlue:'#264478', pink:'#D55B9D', gray:'#A5A5A5'
+};
+const pbiPalette = [PBI.blue, PBI.orange, PBI.green, PBI.yellow, PBI.teal, PBI.purple, PBI.pink, PBI.red, PBI.blue2, PBI.dkBlue, PBI.gray];
+
+// Chart.js defaults para parecer Power BI
+Chart.defaults.color = '#666';
+Chart.defaults.borderColor = '#e0e0e0';
+Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyle = 'rect';
+Chart.defaults.plugins.legend.labels.padding = 12;
+
+function fmt(v) {
+  if (v >= 1000000) return 'R$ ' + (v/1000000).toFixed(1).replace('.',',') + ' Mi';
+  if (v >= 1000) return 'R$ ' + (v/1000).toFixed(1).replace('.',',') + ' Mil';
+  return 'R$ ' + v.toLocaleString('pt-BR');
+}
+function fmtK(v) {
+  if (v >= 1000000) return (v/1000000).toFixed(1)+'M';
+  if (v >= 1000) return (v/1000).toFixed(0)+'k';
+  return v;
+}
+
+// ===== DADOS POR UNIDADE (da planilha) =====
+const DATA = {
+  // GESTÃO FINANCEIRA
+  financeira: {
+    unidades: ['PLC SLMB','HEANA','HEELJ','HMAA','HESLMB','UPA-PED','USF- REGIAO 1','PLC GOIAN','USF-REGIAO 2','UNIDADES MISTAS','CDDI','FUNEV','PERSP'],
+    contratos:[31, 29, 16, 15, 14, 14, 12, 9, 8, 6, 4, 8, 9],
+    custoMensal:[123500, 196800, 73000, 55000, 69400, 52000, 36800, 51800, 80700, 7100, 5800, 18000, 55000]
+  },
+  topFornecedores: [
+    {nome:'MICRO & SOFT', valor:144434, pct:19.5},
+    {nome:'NOXTEC', valor:117471, pct:15.8},
+    {nome:'ADVEN', valor:106229, pct:14.3},
+    {nome:'SIMEON', valor:51322, pct:6.9},
+    {nome:'VOZ DIGITAL', valor:47506, pct:6.4},
+    {nome:'GENUS', valor:35975, pct:4.8},
+    {nome:'DW SERVICE', valor:34769, pct:4.7},
+    {nome:'BR GAP', valor:32553, pct:4.4},
+    {nome:'MV SISTEMAS', valor:23726, pct:3.2},
+    {nome:'A G LIMA', valor:22611, pct:3.0}
+  ],
+  custoUnidade: [
+    {u:'HEANA',v:196780,pct:26.5},{u:'PLC SLMB',v:123513,pct:16.6},{u:'USF-REGIAO 2',v:80762,pct:10.9},
+    {u:'HESLMB',v:68845,pct:9.3},{u:'HEELJ',v:62356,pct:8.4},{u:'PLC GOIAN',v:61179,pct:8.2},
+    {u:'UPA-PED',v:53235,pct:7.2},{u:'USF- REGIAO 1',v:43568,pct:5.9},{u:'HMAA',v:37794,pct:5.1},
+    {u:'UNIDADES MISTAS',v:8026,pct:1.1}
+  ],
+  duplicados: {
+    servicos: [
+      {nome:'SISTEMAS - FUNEV', segs:[{v:2,c:PBI.blue},{v:2,c:PBI.orange},{v:2,c:PBI.green},{v:2,c:PBI.yellow},{v:5,c:PBI.teal},{v:2,c:PBI.purple},{v:3,c:PBI.pink},{v:3,c:PBI.red},{v:2,c:PBI.gray}], total:23},
+      {nome:'SISTEMAS - SES', segs:[{v:6,c:PBI.blue},{v:2,c:PBI.orange},{v:3,c:PBI.green},{v:4,c:PBI.yellow}], total:15},
+      {nome:'OUTSOURCING IMPRESSAO', segs:[{v:4,c:PBI.blue},{v:2,c:PBI.orange},{v:2,c:PBI.green},{v:2,c:PBI.yellow},{v:2,c:PBI.teal},{v:2,c:PBI.purple}], total:14},
+      {nome:'LINK DEDICADO 100 MB', segs:[{v:3,c:PBI.blue},{v:2,c:PBI.green},{v:2,c:PBI.purple}], total:7},
+      {nome:'TELEFONIA', segs:[{v:2,c:PBI.blue}], total:2},
+      {nome:'MV - INTEGRA - LAB', segs:[{v:2,c:PBI.blue}], total:2}
+    ],
+    equipamentos: [
+      {nome:'TOTEM SENHA', segs:[{v:2,c:PBI.blue},{v:2,c:PBI.orange}], total:4},
+      {nome:'NOTEBOOK', segs:[{v:2,c:PBI.blue}], total:2}
+    ]
+  },
+
+  // GESTÃO DE ATIVOS
+  ativos: {
+    unidades: ['USFs','PLC SLMB','PERSP','HEELJ','UPA-PED','HMAA','HEANA','HESLMB'],
+    contrato:  [424, 380, 291, 230, 68, 122, 26, 110],
+    patrimonio:[576, 20, 15, 22, 139, 53, 106, 68],
+    irregular: [358, 0, 9, 0, 47, 28, 0, 0]
+  },
+  irregulares: {
+    unidades: ['USFs','UPA-PED','HMAA','PERSP'],
+    qtd: [358, 47, 28, 9]
+  },
+  vigencia: {
+    meses: ['Mar/26','Abr/26','Mai/26','Jun/26','Jul/26','Ago/26','Set/26','Out/26','Nov/26','Dez/26','Jan/27','Fev/27'],
+    qtd: [5, 8, 3, 12, 10, 4, 8, 3, 4, 6, 3, 2]
+  },
+  fornecedoresVol: {
+    nomes: ['VOZ DIGITAL','MICRO & SOFT','SIMEON','GENUS','A G LIMA','DW SERVICE','NOXTEC','JRV','NEOVERO','EXPLORER NET'],
+    unidades: [10, 9, 9, 7, 6, 6, 5, 4, 4, 3]
+  },
+
+  // GESTÃO PESSOAS (da planilha)
+  pessoas: {
+    unidades: ['HEANA','FUNEV','USFs','HESLMB','HMAA','HEELJ','PERSP','PLC SLMB','UPA-PED'],
+    qtd:      [5, 4, 3, 3, 2, 1, 1, 1, 1],
+    custoFolha:[40053, 0, 13769, 17069, 10754, 6815, 3827, 6093, 3090],
+    cargos: [
+      {cargo:'ANALISTA DE TI', qtd:5},
+      {cargo:'ASSISTENTE TI', qtd:5},
+      {cargo:'SUPERVISOR TI', qtd:3},
+      {cargo:'ASSESSOR TI', qtd:2},
+      {cargo:'TÉCNICO DE TI', qtd:2},
+      {cargo:'AUXILIAR DE TI', qtd:1},
+      {cargo:'CHEFE DE SEÇÃO', qtd:1},
+      {cargo:'COORDENADOR TI', qtd:1},
+      {cargo:'ENCARREGADO TI', qtd:1}
+    ],
+    custoTicket: {
+      unidades:['UPA-PED','PERSP','USFs','HEANA','HMAA','HEELJ','HESLMB','PLC SLMB'],
+      custo:[9, 11, 43, 27, 37, 42, 57, 87]
+    },
+    bolhas: [
+      {u:'HEANA',x:300,y:8011,r:5},{u:'HEELJ',x:161,y:6815,r:1},{u:'HESLMB',x:101,y:5690,r:3},
+      {u:'PLC SLMB',x:70,y:6093,r:1},{u:'USFs',x:107,y:4590,r:3},{u:'HMAA',x:145,y:5377,r:2},
+      {u:'PERSP',x:343,y:3827,r:1},{u:'UPA-PED',x:346,y:3090,r:1}
+    ]
+  },
+
+  // GESTÃO DA DEMANDA (da planilha - agregado)
+  demanda: {
+    unidades: ['HEANA','UPA-PED','PERSP','USFs','HESLMB','HMAA','HEELJ','PLC SLMB','FUNEV'],
+    tickets:  [1500, 346, 343, 321, 302, 290, 161, 70, 65],
+    sobrecarga:[300, 346, 343, 107, 101, 145, 161, 70],
+    categorias: {
+      sistemas:     [0, 47, 211, 98, 183, 128, 92, 29],
+      equipamentos: [0, 188, 121, 218, 119, 162, 69, 33],
+      links:        [0, 107, 5, 5, 0, 0, 0, 5]
+    },
+    turnos: {
+      matutino:   [1351, 152, 236, 233, 136, 149, 78, 35],
+      vespertino: [0, 175, 107, 88, 136, 121, 71, 35],
+      noturno:    [149, 19, 0, 0, 30, 20, 12, 0]
+    },
+    tipoTicket: {requisicao: 1703, incidente: 1695},
+    tipoAtend: {presencial: 3106, remoto: 292},
+    periodo: {matutino: 2420, vespertino: 748, noturno: 230}
+  },
+
+  // ECONOMIA
+  workspace: [
+    {u:'HEANA',antes:3350,eco:40200},{u:'HESLMB',antes:10500,eco:126000},
+    {u:'HEELJ',antes:1117,eco:13404},{u:'UBS-1',antes:2100,eco:25200},
+    {u:'UBS-2',antes:4200,eco:50400},{u:'PLC SLMB',antes:4200,eco:50400}
+  ],
+  cenarios: [
+    {nome:'Centralização Hardware',valor:450000},{nome:'Regularização Softwares',valor:472000},
+    {nome:'Redimensionamento Equipes',valor:400000},{nome:'Centralização SaaS',valor:300000}
+  ]
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let activeUnit = 'ALL';
+let activePage = 'visao-geral';
+let charts = {};
+
+function isActive(u) {
+  if (activeUnit === 'ALL') return true;
+  const map = {'USF- REGIAO 1':'USFs','USF-REGIAO 2':'USFs','UNIDADES MISTAS':'USFs','PLC GOIAN':'PLC SLMB','UPA PED':'UPA-PED'};
+  const mu = map[u] || u;
+  if (Array.isArray(activeUnit)) return activeUnit.some(a => a === u || a === mu || (map[a]||a) === mu);
+  return activeUnit === u || activeUnit === mu;
+}
+
+function destroyChart(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+// ============================================================
+// NAV
+// ============================================================
+document.querySelectorAll('.page-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.page-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    activePage = t.dataset.page;
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(activePage).classList.add('active');
+    const titles = {
+      'visao-geral':'Dashboard de Governança de TI',
+      'gestao-financeira':'Dashboard de Governança de TI - Gestão Financeira',
+      'gestao-ativos':'Dashboard de Governança de TI - Gestão de Ativos',
+      'gestao-pessoas':'Dashboard de Governança de TI - Gestão de Pessoas',
+      'gestao-demanda':'Dashboard de Governança de TI - Gestão da Demanda',
+      'economia':'Dashboard de Governança de TI - Economia & Projeções'
+    };
+    document.getElementById('pageTitle').textContent = titles[activePage] || titles['visao-geral'];
+    renderAll();
+  });
+});
+
+document.querySelectorAll('.sidebar-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const u = btn.dataset.unit;
+    if (u === 'ALL') {
+      activeUnit = 'ALL';
+      document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    } else {
+      document.querySelector('.sidebar-btn[data-unit="ALL"]').classList.remove('active');
+      btn.classList.toggle('active');
+      const actives = Array.from(document.querySelectorAll('.sidebar-btn.active')).map(b => b.dataset.unit).filter(x => x !== 'ALL');
+      if (actives.length === 0) {
+        activeUnit = 'ALL';
+        document.querySelector('.sidebar-btn[data-unit="ALL"]').classList.add('active');
+      } else {
+        activeUnit = actives;
+      }
+    }
+    renderAll();
+  });
+});
+
+// ============================================================
+// RENDER VISÃO GERAL (replica tela 2 - Visão Geral)
+// ============================================================
+function renderVisaoGeral() {
+  const d = DATA.demanda;
+  const totalTickets = d.tickets.reduce((a,b) => a+b, 0);
+  const totalProfs = DATA.pessoas.qtd.reduce((a,b) => a+b, 0);
+
+  document.getElementById('vg-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-icon">🌐</div><div class="kpi-value">64</div><div class="kpi-label">Qtde de Links Internet</div></div>
+    <div class="kpi-card"><div class="kpi-icon">💻</div><div class="kpi-value">2246</div><div class="kpi-label">Qtde de Sistemas</div></div>
+    <div class="kpi-card"><div class="kpi-icon">🖥️</div><div class="kpi-value">4944</div><div class="kpi-label">Qtde total equipamento</div></div>
+    <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-value">R$ 8,9 Mi</div><div class="kpi-label">Total Contratos Ano</div></div>
+  `;
+
+  // Tickets por Tipo (Donut)
+  destroyChart('vgTicketsTipo');
+  charts['vgTicketsTipo'] = new Chart(document.getElementById('vgTicketsTipo'), {
+    type: 'doughnut',
+    data: {
+      labels: ['REQUISICAO','INCIDENTE'],
+      datasets: [{
+        data: [d.tipoTicket.requisicao, d.tipoTicket.incidente],
+        backgroundColor: [PBI.blue, PBI.orange],
+        borderWidth: 2, borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      cutout: '55%',
+      plugins: {
+        legend: { position:'bottom' },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.raw + ' (' + (ctx.raw/(d.tipoTicket.requisicao+d.tipoTicket.incidente)*100).toFixed(2) + '%)' } }
+      }
+    }
+  });
+
+  // Tickets por Tipo Atendimento
+  destroyChart('vgTicketsAtend');
+  charts['vgTicketsAtend'] = new Chart(document.getElementById('vgTicketsAtend'), {
+    type: 'bar',
+    data: {
+      labels: ['PRESENCIAL','REMOTO'],
+      datasets: [{
+        data: [d.tipoAtend.presencial, d.tipoAtend.remoto],
+        backgroundColor: [PBI.green, PBI.teal],
+        borderRadius: 4, borderSkipped: false,
+        barThickness: 60
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{display:false}, tooltip:{ callbacks:{label:ctx=>ctx.raw.toLocaleString('pt-BR')}} },
+      scales: { y:{beginAtZero:true,grid:{color:'#e8e8e8'}}, x:{grid:{display:false}} }
+    }
+  });
+
+  // Tickets por Período
+  destroyChart('vgTicketsPeriodo');
+  charts['vgTicketsPeriodo'] = new Chart(document.getElementById('vgTicketsPeriodo'), {
+    type: 'bar',
+    data: {
+      labels: ['MATUTINO','VESPERTINO','NOTURNO'],
+      datasets: [{
+        data: [d.periodo.matutino, d.periodo.vespertino, d.periodo.noturno],
+        backgroundColor: [PBI.orange, PBI.green, PBI.dkBlue],
+        borderRadius: 4, borderSkipped: false,
+        barThickness: 50
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{display:false} },
+      scales: { y:{beginAtZero:true,grid:{color:'#e8e8e8'}}, x:{grid:{display:false}} }
+    }
+  });
+
+  // Profissionais por Cargo
+  destroyChart('vgProfsCargo');
+  charts['vgProfsCargo'] = new Chart(document.getElementById('vgProfsCargo'), {
+    type: 'bar',
+    data: {
+      labels: DATA.pessoas.cargos.map(c => c.cargo),
+      datasets: [{
+        data: DATA.pessoas.cargos.map(c => c.qtd),
+        backgroundColor: PBI.blue,
+        borderRadius: 4, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{display:false} },
+      scales: { y:{beginAtZero:true,grid:{color:'#e8e8e8'},ticks:{stepSize:1}}, x:{grid:{display:false},ticks:{maxRotation:45}} }
+    }
+  });
+}
+
+// ============================================================
+// RENDER GESTÃO FINANCEIRA (replica tela 1)
+// ============================================================
+function renderFinanceira() {
+  const f = DATA.financeira;
+  let totalContratos = 0, totalCusto = 0;
+  f.unidades.forEach((u,i) => { if(isActive(u)){totalContratos+=f.contratos[i]; totalCusto+=f.custoMensal[i];} });
+
+  document.getElementById('gf-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-value">${totalContratos}</div><div class="kpi-label">Contratos Ativos</div></div>
+    <div class="kpi-card"><div class="kpi-value">${fmt(totalCusto)}</div><div class="kpi-label">Custeio/Mês</div></div>
+    <div class="kpi-card"><div class="kpi-value">${fmt(totalCusto*12)}</div><div class="kpi-label">Custeio Total/Ano</div></div>
+    <div class="kpi-card alert-card"><div class="kpi-value">77</div><div class="kpi-label">Objetos com Contratos Duplicados</div><div class="kpi-sub">14 equipamentos · 63 serviços</div></div>
+  `;
+
+  // Contratos por Unidade (vertical bar)
+  const fu = f.unidades.filter((u,i) => isActive(u));
+  const fc = f.unidades.map((u,i) => isActive(u) ? f.contratos[i] : null).filter(x => x !== null);
+  destroyChart('gfContratosUnid');
+  charts['gfContratosUnid'] = new Chart(document.getElementById('gfContratosUnid'), {
+    type: 'bar',
+    data: {
+      labels: fu,
+      datasets: [{ data: fc, backgroundColor: PBI.blue, borderRadius: 4, borderSkipped: false }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{display:false}, tooltip:{callbacks:{label:ctx=>ctx.raw+' contratos'}} },
+      scales: { y:{beginAtZero:true,grid:{color:'#e8e8e8'}}, x:{grid:{display:false},ticks:{maxRotation:45}} }
+    }
+  });
+
+  // Duplicados (custom HTML stacked bars)
+  let dupHTML = '<div class="stacked-section-label">SERVIÇOS</div>';
+  DATA.duplicados.servicos.forEach(s => {
+    const maxW = 23;
+    dupHTML += `<div class="stacked-row"><div class="stacked-label">${s.nome}</div><div class="stacked-bars">`;
+    s.segs.forEach(seg => {
+      const w = (seg.v / maxW) * 100;
+      dupHTML += `<div class="stacked-segment" style="width:${w}%;background:${seg.c}">${seg.v}</div>`;
+    });
+    dupHTML += `</div><div class="stacked-total">${s.total}</div></div>`;
+  });
+  dupHTML += '<div class="stacked-section-label">EQUIPAMENTOS</div>';
+  DATA.duplicados.equipamentos.forEach(s => {
+    const maxW = 23;
+    dupHTML += `<div class="stacked-row"><div class="stacked-label">${s.nome}</div><div class="stacked-bars">`;
+    s.segs.forEach(seg => {
+      const w = (seg.v / maxW) * 100;
+      dupHTML += `<div class="stacked-segment" style="width:${w}%;background:${seg.c}">${seg.v}</div>`;
+    });
+    dupHTML += `</div><div class="stacked-total">${s.total}</div></div>`;
+  });
+  document.getElementById('gfDuplicados').innerHTML = dupHTML;
+
+  // Top Fornecedores (custom HTML rank)
+  const fornColors = ['#E8B630','#B0A090','#70AD47','#FFC000','#00B0F0','#D55B9D','#ED7D31','#70AD47','#4472C4','#7030A0'];
+  let fHTML = '';
+  DATA.topFornecedores.forEach((f,i) => {
+    const pct = f.valor / 144400 * 100;
+    const barColor = fornColors[i] || PBI.blue;
+    const valueInside = pct > 35;
+    fHTML += `<div class="rank-item">
+      <div class="rank-medal" style="background:${barColor}">${i+1}°</div>
+      <div class="rank-name">${f.nome}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${pct}%;background:${barColor}">
+        ${valueInside ? fmt(f.valor) : ''}
+      </div>${!valueInside ? '<span style="margin-left:4px;font-size:11px;color:#555;white-space:nowrap">'+fmt(f.valor)+'</span>' : ''}</div></div>
+      <div class="rank-pct">${f.pct}%</div>
+    </div>`;
+  });
+  document.getElementById('gfFornecedores').innerHTML = fHTML;
+
+  // Custo por Unidade (custom HTML hbar)
+  const cus = DATA.custoUnidade.filter(c => isActive(c.u));
+  const maxCusto = cus.length ? Math.max(...cus.map(c => c.v)) : 1;
+  let cuHTML = '';
+  cus.forEach(c => {
+    const pct = (c.v / maxCusto) * 100;
+    cuHTML += `<div class="hbar-item">
+      <div class="hbar-label">${c.u}</div>
+      <div class="hbar-wrap"><div class="hbar-bg"><div class="hbar-fill" style="width:${pct}%;background:${PBI.red}">${fmt(c.v)}</div></div></div>
+      <div class="hbar-pct">${c.pct}%</div>
+    </div>`;
+  });
+  document.getElementById('gfCustoUnidade').innerHTML = cuHTML;
+}
+
+// ============================================================
+// RENDER GESTÃO DE ATIVOS
+// ============================================================
+function renderAtivos() {
+  const a = DATA.ativos;
+  let tC=0,tP=0,tI=0;
+  a.unidades.forEach((u,i) => { if(isActive(u)){tC+=a.contrato[i];tP+=a.patrimonio[i];tI+=a.irregular[i];} });
+  const tT = tC+tP+tI;
+
+  document.getElementById('ga-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-value">${tT.toLocaleString('pt-BR')}+</div><div class="kpi-label">Total Equipamentos</div><div class="kpi-sub">Custo Mensal: R$ 467k</div></div>
+    <div class="kpi-card"><div class="kpi-value">${tC.toLocaleString('pt-BR')}</div><div class="kpi-label">Contratualizados (${tT?Math.round(tC/tT*100):0}%)</div></div>
+    <div class="kpi-card"><div class="kpi-value">${tP.toLocaleString('pt-BR')}</div><div class="kpi-label">Patrimônio (${tT?Math.round(tP/tT*100):0}%)</div></div>
+    <div class="kpi-card alert-card"><div class="kpi-value">${tI}+</div><div class="kpi-label">Irregulares (${tT?Math.round(tI/tT*100):0}%)</div><div class="kpi-sub">Risco: R$ 2,8M</div></div>
+  `;
+
+  // Irregulares
+  const ir = DATA.irregulares;
+  const fir = ir.unidades.filter(u => isActive(u));
+  const firD = ir.unidades.map((u,i) => isActive(u)?ir.qtd[i]:null).filter(x=>x!==null);
+  destroyChart('gaIrregulares');
+  charts['gaIrregulares'] = new Chart(document.getElementById('gaIrregulares'), {
+    type:'bar', data:{ labels:fir, datasets:[{data:firD,backgroundColor:PBI.red,borderRadius:4,borderSkipped:false}] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true,grid:{color:'#e8e8e8'}},y:{grid:{display:false}}} }
+  });
+
+  // Modalidade stacked
+  const fu2 = a.unidades.filter(u => isActive(u));
+  const fd = (arr) => a.unidades.map((u,i)=>isActive(u)?arr[i]:null).filter(x=>x!==null);
+  destroyChart('gaModalidade');
+  charts['gaModalidade'] = new Chart(document.getElementById('gaModalidade'), {
+    type:'bar',
+    data:{ labels:fu2, datasets:[
+      {label:'Contrato',data:fd(a.contrato),backgroundColor:PBI.green,borderRadius:2},
+      {label:'Patrimônio',data:fd(a.patrimonio),backgroundColor:PBI.blue,borderRadius:2},
+      {label:'Irregular',data:fd(a.irregular),backgroundColor:PBI.red,borderRadius:2}
+    ]},
+    options:{ responsive:true,maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,grid:{color:'#e8e8e8'}}} }
+  });
+
+  // Vigência
+  destroyChart('gaVigencia');
+  charts['gaVigencia'] = new Chart(document.getElementById('gaVigencia'), {
+    type:'line',
+    data:{ labels:DATA.vigencia.meses, datasets:[{label:'Contratos',data:DATA.vigencia.qtd,borderColor:PBI.orange,backgroundColor:'rgba(237,125,49,0.1)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:PBI.orange,pointBorderColor:'#fff',pointBorderWidth:2}] },
+    options:{ responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,grid:{color:'#e8e8e8'}},x:{grid:{display:false}}} }
+  });
+
+  // Fornecedores volume
+  destroyChart('gaFornecedoresVol');
+  charts['gaFornecedoresVol'] = new Chart(document.getElementById('gaFornecedoresVol'), {
+    type:'bar',
+    data:{ labels:DATA.fornecedoresVol.nomes, datasets:[{data:DATA.fornecedoresVol.unidades,backgroundColor:pbiPalette,borderRadius:4,borderSkipped:false}] },
+    options:{ indexAxis:'y',responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true,grid:{color:'#e8e8e8'},ticks:{stepSize:1}},y:{grid:{display:false}}} }
+  });
+}
+
+// ============================================================
+// RENDER GESTÃO DE PESSOAS
+// ============================================================
+function renderPessoas() {
+  const p = DATA.pessoas;
+  let tP=0,tF=0;
+  p.unidades.forEach((u,i) => { if(isActive(u)){tP+=p.qtd[i];tF+=p.custoFolha[i];} });
+
+  document.getElementById('gp-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-value">${tP}</div><div class="kpi-label">Total Profissionais</div></div>
+    <div class="kpi-card"><div class="kpi-value">${fmt(tF)}/mês</div><div class="kpi-label">Custo Folha</div></div>
+    <div class="kpi-card"><div class="kpi-value">3</div><div class="kpi-label">Cobertura 24h</div><div class="kpi-sub">HEELJ, HESLMB, USFs</div></div>
+    <div class="kpi-card alert-card"><div class="kpi-value">3</div><div class="kpi-label">Profissional Único</div><div class="kpi-sub">UPA, PERSP, PLC</div></div>
+  `;
+
+  const fu = p.unidades.filter(u=>isActive(u));
+  const fq = p.unidades.map((u,i)=>isActive(u)?p.qtd[i]:null).filter(x=>x!==null);
+  const ff = p.unidades.map((u,i)=>isActive(u)?p.custoFolha[i]:null).filter(x=>x!==null);
+
+  destroyChart('gpProfissionais');
+  charts['gpProfissionais'] = new Chart(document.getElementById('gpProfissionais'), {
+    type:'bar', data:{labels:fu,datasets:[{data:fq,backgroundColor:PBI.blue,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#e8e8e8'},ticks:{stepSize:1}},x:{grid:{display:false}}}}
+  });
+
+  destroyChart('gpFolha');
+  const ffSorted = fu.map((u,i)=>({u,v:ff[i]})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  charts['gpFolha'] = new Chart(document.getElementById('gpFolha'), {
+    type:'bar', data:{labels:ffSorted.map(x=>x.u),datasets:[{data:ffSorted.map(x=>x.v),backgroundColor:PBI.blue,borderRadius:4,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},scales:{x:{beginAtZero:true,grid:{color:'#e8e8e8'},ticks:{callback:v=>fmtK(v)}},y:{grid:{display:false}}}}
+  });
+
+  // Custo por Ticket
+  const ct = p.custoTicket;
+  const fct = ct.unidades.filter(u=>isActive(u));
+  const fctD = ct.unidades.map((u,i)=>isActive(u)?ct.custo[i]:null).filter(x=>x!==null);
+  destroyChart('gpCustoTicket');
+  charts['gpCustoTicket'] = new Chart(document.getElementById('gpCustoTicket'), {
+    type:'bar',
+    data:{labels:fct,datasets:[{data:fctD,backgroundColor:fctD.map(v=>v<=27?PBI.green:v<=57?PBI.orange:PBI.red),borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'R$ '+ctx.raw}}},scales:{y:{beginAtZero:true,grid:{color:'#e8e8e8'},ticks:{callback:v=>'R$'+v}},x:{grid:{display:false}}}}
+  });
+
+  // Bolhas
+  const fb = p.bolhas.filter(b=>isActive(b.u));
+  destroyChart('gpBolhas');
+  charts['gpBolhas'] = new Chart(document.getElementById('gpBolhas'), {
+    type:'bubble',
+    data:{datasets:fb.map((b,i)=>({label:b.u,data:[{x:b.x,y:b.y,r:b.r*5+5}],backgroundColor:pbiPalette[i]+'99',borderColor:pbiPalette[i],borderWidth:2}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}},scales:{
+      x:{title:{display:true,text:'Tickets/Profissional',color:'#666'},grid:{color:'#e8e8e8'}},
+      y:{title:{display:true,text:'Custo/Profissional (R$)',color:'#666'},grid:{color:'#e8e8e8'},ticks:{callback:v=>fmtK(v)}}
+    }}
+  });
+}
+
+// ============================================================
+// RENDER GESTÃO DA DEMANDA
+// ============================================================
+function renderDemanda() {
+  const d = DATA.demanda;
+  const totalT = d.tickets.reduce((a,b)=>a+b,0);
+
+  document.getElementById('gd-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-value">${totalT.toLocaleString('pt-BR')}</div><div class="kpi-label">Total Tickets/Mês</div><div class="kpi-sub">Média horas: 9,3h</div></div>
+    <div class="kpi-card"><div class="kpi-value">50%</div><div class="kpi-label">Incidentes</div><div class="kpi-sub">50% Requisições</div></div>
+    <div class="kpi-card"><div class="kpi-value">91%</div><div class="kpi-label">Presencial</div><div class="kpi-sub">9% Remoto</div></div>
+    <div class="kpi-card alert-card"><div class="kpi-value">12</div><div class="kpi-label">Tickets Não Solucionados</div><div class="kpi-sub">USFs — CELK</div></div>
+  `;
+
+  const fu = d.unidades.slice(0,8).filter(u=>isActive(u));
+  const ft = d.unidades.slice(0,8).map((u,i)=>isActive(u)?d.tickets[i]:null).filter(x=>x!==null);
+
+  destroyChart('gdTicketsUnid');
+  charts['gdTicketsUnid'] = new Chart(document.getElementById('gdTicketsUnid'), {
+    type:'bar', data:{labels:fu,datasets:[{data:ft,backgroundColor:PBI.blue,borderRadius:4,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#e8e8e8'}},y:{grid:{display:false}}}}
+  });
+
+  // Sobrecarga
+  const su = d.unidades.slice(0,8).filter(u=>isActive(u));
+  const sd = d.unidades.slice(0,8).map((u,i)=>isActive(u)?d.sobrecarga[i]:null).filter(x=>x!==null);
+  destroyChart('gdSobrecarga');
+  charts['gdSobrecarga'] = new Chart(document.getElementById('gdSobrecarga'), {
+    type:'bar',
+    data:{labels:su,datasets:[{data:sd,backgroundColor:sd.map(v=>v>144?PBI.red:PBI.green),borderRadius:4,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+' tickets/prof'}}},scales:{x:{beginAtZero:true,grid:{color:'#e8e8e8'}},y:{grid:{display:false}}}}
+  });
+
+  // Categoria stacked
+  const cu = d.unidades.slice(0,8).filter(u=>isActive(u));
+  const cs = d.unidades.slice(0,8).map((u,i)=>isActive(u)?d.categorias.sistemas[i]:null).filter(x=>x!==null);
+  const ce = d.unidades.slice(0,8).map((u,i)=>isActive(u)?d.categorias.equipamentos[i]:null).filter(x=>x!==null);
+  const cl = d.unidades.slice(0,8).map((u,i)=>isActive(u)?d.categorias.links[i]:null).filter(x=>x!==null);
+  destroyChart('gdCategoria');
+  charts['gdCategoria'] = new Chart(document.getElementById('gdCategoria'), {
+    type:'bar',
+    data:{labels:cu,datasets:[
+      {label:'Sistemas',data:cs,backgroundColor:PBI.blue,borderRadius:2},
+      {label:'Equipamentos',data:ce,backgroundColor:PBI.orange,borderRadius:2},
+      {label:'Links',data:cl,backgroundColor:PBI.green,borderRadius:2}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,grid:{color:'#e8e8e8'}}}}
+  });
+
+  // Turno
+  const tu = d.unidades.slice(0,8).filter(u=>isActive(u));
+  const tm = d.unidades.slice(0,8).map((u,i)=>isActive(u)?d.turnos.matutino[i]:null).filter(x=>x!==null);
+  const tv = d.unidades.slice(0,8).map((u,i)=>isActive(u)?d.turnos.vespertino[i]:null).filter(x=>x!==null);
+  const tn = d.unidades.slice(0,8).map((u,i)=>isActive(u)?d.turnos.noturno[i]:null).filter(x=>x!==null);
+  destroyChart('gdTurno');
+  charts['gdTurno'] = new Chart(document.getElementById('gdTurno'), {
+    type:'bar',
+    data:{labels:tu,datasets:[
+      {label:'Matutino',data:tm,backgroundColor:PBI.orange,borderRadius:2},
+      {label:'Vespertino',data:tv,backgroundColor:PBI.green,borderRadius:2},
+      {label:'Noturno',data:tn,backgroundColor:PBI.dkBlue,borderRadius:2}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,grid:{color:'#e8e8e8'}}}}
+  });
+}
+
+// ============================================================
+// RENDER ECONOMIA
+// ============================================================
+function renderEconomia() {
+  document.getElementById('ec-kpis').innerHTML = `
+    <div class="kpi-card success-card"><div class="kpi-value">R$ 305k</div><div class="kpi-label">Economia Já Obtida/Ano</div><div class="kpi-sub">Workspace 100% regular</div></div>
+    <div class="kpi-card success-card"><div class="kpi-value">R$ 1,15M</div><div class="kpi-label">Projeção Economia/Ano</div><div class="kpi-sub">Payback: 5 meses</div></div>
+    <div class="kpi-card"><div class="kpi-value">R$ 472k</div><div class="kpi-label">Investimento Necessário</div><div class="kpi-sub">Regularização softwares</div></div>
+    <div class="kpi-card success-card"><div class="kpi-value">1.200%</div><div class="kpi-label">ROI em 5 Anos</div></div>
+  `;
+
+  // Workspace
+  destroyChart('ecWorkspace');
+  charts['ecWorkspace'] = new Chart(document.getElementById('ecWorkspace'), {
+    type:'bar',
+    data:{labels:DATA.workspace.map(w=>w.u),datasets:[
+      {label:'Custo Anterior/Mês',data:DATA.workspace.map(w=>w.antes),backgroundColor:PBI.red+'cc',borderRadius:4,borderSkipped:false},
+      {label:'Economia Anual',data:DATA.workspace.map(w=>w.eco),backgroundColor:PBI.green+'cc',borderRadius:4,borderSkipped:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},scales:{y:{beginAtZero:true,grid:{color:'#e8e8e8'},ticks:{callback:v=>fmtK(v)}},x:{grid:{display:false}}}}
+  });
+
+  // Cenários
+  destroyChart('ecCenarios');
+  charts['ecCenarios'] = new Chart(document.getElementById('ecCenarios'), {
+    type:'bar',
+    data:{labels:DATA.cenarios.map(c=>c.nome),datasets:[{data:DATA.cenarios.map(c=>c.valor),backgroundColor:[PBI.blue,PBI.red,PBI.orange,PBI.green],borderRadius:4,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},scales:{x:{beginAtZero:true,grid:{color:'#e8e8e8'},ticks:{callback:v=>fmtK(v)}},y:{grid:{display:false}}}}
+  });
+}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll() {
+  switch(activePage) {
+    case 'visao-geral': renderVisaoGeral(); break;
+    case 'gestao-financeira': renderFinanceira(); break;
+    case 'gestao-ativos': renderAtivos(); break;
+    case 'gestao-pessoas': renderPessoas(); break;
+    case 'gestao-demanda': renderDemanda(); break;
+    case 'economia': renderEconomia(); break;
+  }
+}
+
+renderAll();
+</script>
+</body>
+</html>
