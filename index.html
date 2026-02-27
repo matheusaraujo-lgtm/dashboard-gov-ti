@@ -531,7 +531,6 @@ body {
   <div class="main">
     <div class="header">
       <h1 id="pageTitle">Dashboard de Governança de TI - Gestão Financeira</h1>
-      <div class="subtitle">📅 Base: FEV/2026</div>
     </div>
 
     <!-- PAGE TABS -->
@@ -567,7 +566,7 @@ body {
         <div class="charts-row">
           <div class="chart-card w40">
             <div class="kpi-row" style="margin-bottom:0">
-              <div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:28px" id="vgUnid24h">2</div><div class="kpi-label">Unidades com 24h</div></div>
+              <div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:28px" id="vgUnid24h">5</div><div class="kpi-label">Unidades com 24h</div></div>
               <div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:28px" id="vgHorasRes">6,89</div><div class="kpi-label">Média Horas Resolução</div></div>
             </div>
             <div class="kpi-row" style="margin-top:12px;margin-bottom:0">
@@ -974,7 +973,7 @@ function renderVisaoGeral() {
 
   document.getElementById('vg-kpis').innerHTML = `
     <div class="kpi-card"><div class="kpi-icon">🌐</div><div class="kpi-value">64</div><div class="kpi-label">Qtde de Links Internet</div></div>
-    <div class="kpi-card"><div class="kpi-icon">💻</div><div class="kpi-value">2246</div><div class="kpi-label">Qtde de Sistemas</div></div>
+    <div class="kpi-card"><div class="kpi-icon">💻</div><div class="kpi-value">16</div><div class="kpi-label">Qtde de Sistemas</div></div>
     <div class="kpi-card"><div class="kpi-icon">🖥️</div><div class="kpi-value">4944</div><div class="kpi-label">Qtde total equipamento</div></div>
     <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-value">R$ 8,9 Mi</div><div class="kpi-label">Total Contratos Ano</div></div>
   `;
@@ -1217,7 +1216,7 @@ function renderPessoas() {
   document.getElementById('gp-kpis').innerHTML = `
     <div class="kpi-card"><div class="kpi-value">${tP}</div><div class="kpi-label">Total Profissionais</div></div>
     <div class="kpi-card"><div class="kpi-value">${fmt(tF)}/mês</div><div class="kpi-label">Custo Folha</div></div>
-    <div class="kpi-card"><div class="kpi-value">3</div><div class="kpi-label">Cobertura 24h</div><div class="kpi-sub">HEELJ, HESLMB, USFs</div></div>
+    <div class="kpi-card"><div class="kpi-value">5</div><div class="kpi-label">Cobertura 24h</div><div class="kpi-sub">HEELJ, HESLMB, USFs</div></div>
     <div class="kpi-card alert-card"><div class="kpi-value">3</div><div class="kpi-label">Profissional Único</div><div class="kpi-sub">UPA, PERSP, PLC</div></div>
   `;
 
